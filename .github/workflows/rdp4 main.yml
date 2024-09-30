@@ -5,17 +5,18 @@ on:
 
 jobs:
   build:
-    name: Start Building...
+    name: Start Build Process
     runs-on: windows-latest
     timeout-minutes: 9999
     
     steps:
-      - name: Downloading & Installing Essentials
+      - name: Download and Install Essentials
         run: |
           Invoke-WebRequest -Uri "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
-          cmd /c Downloads.bat
+          Start-Process "Downloads.bat" -Wait
+
       - name: Connect to LiteManager
-        run: cmd /c show.bat
+        run: Start-Process "show.bat" -Wait
 
       - name: Time Counter
-        run: cmd /c loop.bat
+        run: Start-Process "loop.bat" -Wait
