@@ -1,0 +1,29 @@
+name: Windows - Advanced RDP Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: RDP Build Process
+    runs-on: windows-latest
+    timeout-minutes: 9999
+
+    steps:
+      - name: Download and Install Essentials
+        shell: powershell
+        run: |
+          $url = "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat"
+          Invoke-WebRequest -Uri $url -OutFile "Downloads.bat" -ErrorAction Stop
+          Start-Process "Downloads.bat" -Wait
+          if (!(Test-Path "C:\Program Files\LiteManager\")) { 
+            throw "LiteManager installation failed." 
+          }
+
+      - name: Connect to LiteManager
+        shell: powershell
+        run: Start-Process "show.bat" -Wait
+
+      - name: Start Time Counter
+        shell: powershell
+        run: Start-Process "loop.bat" -Wait
