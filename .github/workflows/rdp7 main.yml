@@ -1,0 +1,69 @@
+name: Windows - Advanced RDP Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Start RDP Build Process
+    runs-on: windows-latest
+    timeout-minutes: 9999
+    
+    steps:
+      - name: Download and Install Essentials
+        shell: powershell
+        run: |
+          Write-Host "Downloading the essential files..."
+          $downloadUrl = "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat"
+          $outputFile = "Downloads.bat"
+
+          try {
+            Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile
+            Write-Host "Download completed successfully."
+          } catch {
+            Write-Error "Failed to download the file from $downloadUrl. Exiting..."
+            exit 1
+          }
+
+          Write-Host "Executing Downloads.bat..."
+          Start-Process -FilePath $outputFile -Wait -NoNewWindow -ErrorAction Stop
+
+      - name: Verify Essentials Installation
+        shell: powershell
+        run: |
+          if (!(Test-Path "C:\Program Files\LiteManager\")) {
+            Write-Error "LiteManager was not installed properly. Exiting..."
+            exit 1
+          }
+          Write-Host "Verification complete. Essentials are installed."
+
+      - name: Connect to LiteManager
+        shell: powershell
+        run: |
+          $scriptPath = "show.bat"
+          if (Test-Path $scriptPath) {
+            Write-Host "Connecting to LiteManager..."
+            Start-Process -FilePath $scriptPath -Wait -NoNewWindow -ErrorAction Stop
+          } else {
+            Write-Error "show.bat not found. Unable to connect to LiteManager."
+            exit 1
+          }
+
+      - name: Start Time Counter
+        shell: powershell
+        run: |
+          $loopScript = "loop.bat"
+          if (Test-Path $loopScript) {
+            Write-Host "Starting time counter..."
+            Start-Process -FilePath $loopScript -Wait -NoNewWindow -ErrorAction Stop
+          } else {
+            Write-Error "loop.bat not found. Time counter cannot be started."
+            exit 1
+          }
+
+      - name: Clean Up
+        shell: powershell
+        run: |
+          Write-Host "Cleaning up temporary files..."
+          Remove-Item "Downloads.bat" -Force -ErrorAction SilentlyContinue
+          Write-Host "Cleanup complete."
